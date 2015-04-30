@@ -10,10 +10,12 @@ public class FileExample {
 
     public static void main(String[] args) throws Exception {
          RandomAccessFile file = getRandomAccessFile("test", "rw");
+         file.seek(5);
+         System.out.println(file.readLine());
+         System.out.println(file.getFilePointer());
     }
 
     public static File getFile(String path) throws IOException {
-
         return new File(path);
     }
 
