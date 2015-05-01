@@ -17,7 +17,7 @@ public class Stopwatch {
 		STARTINGTIME = System.currentTimeMillis();
 	}
 
-	public static void end() {
+	public static void stop() {
 		if (!STARTED) {
 			throw new RuntimeException("Haven't started");
 		}
@@ -30,10 +30,10 @@ public class Stopwatch {
 	public static void main(String[] args) throws Exception{
 		Stopwatch.start();
 		Thread.sleep(1000);
-		Stopwatch.end();
+		Stopwatch.stop();
 		
 		Stopwatch.start();
 		Thread.sleep(1500);
-		Stopwatch.end();
+		Stopwatch.stop();
 	}
 }
