@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Arrays;
 
 import com.superluli.javaio.util.Stopwatch;
@@ -13,7 +16,7 @@ public class BufferExample {
 
 	public static void main(String[] args) throws Exception {
 
-		testFlush();
+		testBuffer();
 	}
 
 	public static void testBuffer() throws Exception {
@@ -30,14 +33,29 @@ public class BufferExample {
 		 * improve performance significantly
 		 */
 		Stopwatch.start();
-		readWithBuffer(new FileInputStream("bigdata"));
+		readWithBuffer(new FileInputStream("bigdata.data"));
+		Stopwatch.stop();
+		
+		/*
+		 * When read a single byte(or small piece of data), BufferedInputStream
+		 * improve performance significantly
+		 */
+		Stopwatch.start();
+		readWithBufferEnhanced(new FileInputStream("bigdata.data"));
 		Stopwatch.stop();
 
 		/*
 		 * When read a chunk at a time, BufferedInputStream won't help
 		 */
 		Stopwatch.start();
-		readWithBuffer2(new FileInputStream("bigdata"));
+		readWithBuffer2(new FileInputStream("bigdata.data"));
+		Stopwatch.stop();
+		
+		/*
+		 * NIO way, same as chunk read 
+		 */
+		Stopwatch.start();
+		readWithBuffer3(new RandomAccessFile("bigdata.data", "r").getChannel());
 		Stopwatch.stop();
 	}
 
@@ -78,6 +96,18 @@ public class BufferExample {
 		System.out.println(total);
 	}
 
+	public static void readWithBufferEnhanced(InputStream in) throws Exception {
+
+		int total = 0;
+		BufferedInputStream bin = new BufferedInputStream(in, 8 * 1024);
+		byte[] buffer = new byte[1024*32];
+		int bytesRead = 0;
+		while ((bytesRead = bin.read(buffer)) != -1) {
+			total += bytesRead;
+		}
+		System.out.println(total);
+	}
+	
 	public static void readWithBuffer2(InputStream in) throws Exception {
 
 		int total = 0;
@@ -89,6 +119,18 @@ public class BufferExample {
 		System.out.println(total);
 	}
 
+	public static void readWithBuffer3(FileChannel fc) throws Exception {
+
+		ByteBuffer bb = ByteBuffer.allocate(1024 * 8);
+		int total = 0;
+		int bytesRead = 0;
+		while ((bytesRead = fc.read(bb)) != -1) {
+			bb.clear();
+			total += bytesRead;
+		}
+		System.out.println(total);
+	}	
+	
 	public static void writeSingle(int n) throws Exception {
 
 		FileOutputStream out = new FileOutputStream("buffer1.data");
